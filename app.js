@@ -2,45 +2,35 @@
 /**
  * Module dependencies
  */
+var express = require('express')
+  , routes = require('./routes')
+  , http = require('http')
+  , path = require('path')
+  ,api = require('./routes/api');
+//  morgan = require('morgan'),
 
-var express = require('express'),
-  bodyParser = require('body-parser'),
-  methodOverride = require('method-override'),
-  errorHandler = require('error-handler'),
-  morgan = require('morgan'),
-  routes = require('./routes'),
-  api = require('./routes/api'),
-  http = require('http'),
-  path = require('path');
-
-var app = module.exports = express();
-
+var app = express();
 
 /**
  * Configuration
  */
+app.configure(function(){
+  app.set('port', process.env.PORT || 3000);
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'jade');
+  app.use(express.favicon());
+  app.use(express.logger('dev'));
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+  // all environments
+//app.use(morgan('dev'));
+  app.use(app.router);
+  app.use(express.static(path.join(__dirname, 'public')));
+});
 
-// all environments
-app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.use(morgan('dev'));
-app.use(bodyParser());
-app.use(methodOverride());
-app.use(express.static(path.join(__dirname, 'public')));
-
-var env = process.env.NODE_ENV || 'development';
-
-// development only
-if (env === 'development') {
+app.configure('development', function(){
   app.use(express.errorHandler());
-}
-
-// production only
-if (env === 'production') {
-  // TODO
-}
-
+});
 
 /**
  * Routes
@@ -54,7 +44,7 @@ app.get('/partials/:name', routes.partials);
 app.get('/api/name', api.name);
 
 // redirect all others to the index (HTML5 history)
-app.get('*', routes.index);
+//app.get('*', routes.index);
 
 
 /**
